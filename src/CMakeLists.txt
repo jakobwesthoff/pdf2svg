@@ -30,6 +30,7 @@ link_directories(${LIB_PATHS})
 
 set(VALA_SRC
 	pdf2svg.vala
+	transformer.vala
 )
 
 vala_precompile(VALA_C
@@ -38,6 +39,7 @@ PACKAGES
 	gio-2.0
 	poppler-glib
 	cairo
+	posix
 )
 
 add_executable(pdf2svg

@@ -31,9 +31,75 @@ using GLib;
 
 namespace org.westhoffswelt.pdf2svg {
 
+    /**
+     * pdf2svg main application class
+     *
+     * This class contains all the initialization code like commandline
+     * handling, as well as file and directory handling.
+     * The conversion itself is NOT implemented in this class
+     */
     public class Pdf2Svg: Object {
+        
+        /**
+         * Options for the commandline parser
+         */
+        const OptionEntry[] options = {
+            { "output", 'o', 0, OptionArg.STRING, ref Pdf2Svg.output_directory, "Directory used to store the created SVG files. (Default: Current working directory)", "DIRECTORY" },
+            { "prefix", 'p', 0, OptionArg.STRING, ref Pdf2Svg.svg_prefix, "Prefix used for the created SVG files. (Default: Input filename with the extension stripped)", "PREFIX" },
+            { "digits", 'd', 0, OptionArg.INT, ref Pdf2Svg.page_number_digits, "Number of digits to use for page numbering. (Default: 3)", "N" },
+            { null }
+        };
+
+        /**
+         * Output directory used to store the generated SVG files.
+         */
+        protected static string output_directory = null;
+
+        /**
+         * Prefix used to name the generated SVG files.
+         */
+        protected static string svg_prefix = null;
+
+        /**
+         * Number of digits to use for the page numbering
+         */
+        protected static int page_number_digits = 0;
+
+        /**
+         * Format string used to create output filename
+         */
+        protected string svg_output_format = null;
+
+        /**
+         * Run the main application.
+         *
+         * This method exists to execute all needed init code inside the object
+         * scope instead of being run statically inside the main function
+         */
         protected int run( string[] args ) {
-            var pdf_file = File.new_for_commandline_arg( args[1] );
+            stdout.printf( "pdf2svg Version 1.x DEVELOPMENT Copyright 2010 Jakob Westhoff\n" );
+
+            this.parse_command_line_options( args );
+            this.ensure_default_options( args );
+
+            File pdf_file = File.new_for_commandline_arg( args[1] );
+            
+            Transformer transformer = new Transformer( pdf_file );
+
+            for( int i = 0, l = transformer.get_number_of_pages(); i < l; ++i ) {
+                try {
+                    stdout.printf( "Transforming page %i.\n", i+1 );
+                    transformer.render_page_to_svg( 
+                        i,
+                        this.create_svg_output_filename_for_page( i ) 
+                    );
+                }
+                catch( Error e ) {
+                    error( "Fatal error transforming page %i: %s.", i+1, e.message );
+                }
+            }
+/*
+
             var page_number = args[2].to_int();
             var output = args[3];
             
@@ -53,7 +119,83 @@ namespace org.westhoffswelt.pdf2svg {
             }
             catch( Error e ) {
                 error( "Oops: %s", e.message );
+            }*/
+            return 0;
+        }
+
+        /**
+         * Parse the commandline and apply all found options to there according
+         * static class members.
+         *
+         * On error the usage help is shown and the application terminated with an
+         * errorcode 1
+         */
+        protected void parse_command_line_options( string[] args ) {
+            var context = new OptionContext( "<pdf-file>" );
+
+            context.add_main_entries( options, null );
+            
+            try {
+                context.parse( ref args );
             }
+            catch( OptionError e ) {
+                stderr.printf( "\n%s\n\n", e.message );
+                stderr.printf( "%s", context.get_help( true, null ) );
+                Posix.exit( 1 );
+            }
+
+            // Make sure there is still an argument (pdf-file) specified after
+            // the options have been parsed
+            if ( args.length != 2 ) {
+                stderr.printf( "%s", context.get_help( true, null ) );
+                Posix.exit( 1 );
+            }
+        }
+
+        /**
+         * Ensure that all the default values for any non given commandline
+         * option is set properly
+         */
+        protected void ensure_default_options( string[] args ) {
+            if ( Pdf2Svg.output_directory == null ) {
+                Pdf2Svg.output_directory = Environment.get_current_dir();
+            }
+
+            if ( Pdf2Svg.svg_prefix == null ) {
+                var filepath = Path.get_basename( args[1] );
+                var pSuffix = filepath.rchr( -1, ".".get_char() );
+                 
+                if ( pSuffix == null ) {
+                    Pdf2Svg.svg_prefix = filepath;
+                }
+                else {
+                    long position = filepath.pointer_to_offset( pSuffix );
+                    Pdf2Svg.svg_prefix = filepath.slice( 0, position );
+                }
+            }
+
+            if ( Pdf2Svg.page_number_digits < 1 ) {
+                Pdf2Svg.page_number_digits = 3;
+            }
+        }
+
+        /**
+         * Create and return a correctly formated output filename with correct
+         * path for an arbitrary pdf page number.
+         */
+        protected string create_svg_output_filename_for_page( int i ) {
+            if ( this.svg_output_format == null ) {
+                var fmt = new StringBuilder();
+                fmt.append( this.output_directory );
+                fmt.append( Path.DIR_SEPARATOR_S );
+                fmt.append( this.svg_prefix );
+                fmt.append( "%0" );
+                fmt.append( this.page_number_digits.to_string() );
+                fmt.append( "d" );
+                fmt.append( ".svg" );
+                this.svg_output_format = fmt.str;
+            }
+            return this.svg_output_format.printf( i );
         }
 
         /**
