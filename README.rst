@@ -52,7 +52,6 @@ be controlled using commandline options::
       -d, --digits=N             Number of digits to use for page numbering. (Default: 3)
 
 
-
 
 ..
    Local Variables:
