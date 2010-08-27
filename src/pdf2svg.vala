@@ -82,7 +82,17 @@ namespace org.westhoffswelt.pdf2svg {
             this.parse_command_line_options( args );
             this.ensure_default_options( args );
 
+            File output_directory = File.new_for_commandline_arg( Pdf2Svg.output_directory );
+            if ( !output_directory.query_exists( null ) ) {
+                stderr.printf( "Error: Output directory does not exist.\n" );
+                Posix.exit( 2 );
+            }
+
             File pdf_file = File.new_for_commandline_arg( args[1] );
+            if ( !pdf_file.query_exists( null ) ) {
+                stderr.printf( "Error: PDF file does not exist.\n" );
+                Posix.exit( 2 );
+            }
             
             Transformer transformer = new Transformer( pdf_file );
 
