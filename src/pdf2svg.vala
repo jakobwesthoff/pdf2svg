@@ -169,7 +169,7 @@ namespace org.westhoffswelt.pdf2svg {
                     Pdf2Svg.svg_prefix = filepath;
                 }
                 else {
-                    long position = filepath.pointer_to_offset( pSuffix );
+                    long position = filepath.length - pSuffix.length;
                     Pdf2Svg.svg_prefix = filepath.slice( 0, position );
                 }
             }
@@ -186,11 +186,11 @@ namespace org.westhoffswelt.pdf2svg {
         protected string create_svg_output_filename_for_page( int i ) {
             if ( this.svg_output_format == null ) {
                 var fmt = new StringBuilder();
-                fmt.append( this.output_directory );
+                fmt.append( Pdf2Svg.output_directory );
                 fmt.append( Path.DIR_SEPARATOR_S );
-                fmt.append( this.svg_prefix );
+                fmt.append( Pdf2Svg.svg_prefix );
                 fmt.append( "%0" );
-                fmt.append( this.page_number_digits.to_string() );
+                fmt.append( Pdf2Svg.page_number_digits.to_string() );
                 fmt.append( "d" );
                 fmt.append( ".svg" );
                 this.svg_output_format = fmt.str;
