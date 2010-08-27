@@ -15,7 +15,7 @@ This tool has been created as a fast hack to create usable data for a HTML5
 based widget to display the slides of given talks directly in the my blog.
 
 I have tried solutions involving different kinds of known vector editing tools
-like inkscape pdf2ps and co. before. Unfortunately I had no look creating
+like inkscape pdf2ps and co. before. Unfortunately I had no luck creating
 usable, good looking svgs out of arbitrary pdf slides. Therefore I quickly
 hacked my own solution.
 
