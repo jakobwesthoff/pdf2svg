@@ -1,11 +1,11 @@
 =======
-Pdf2Svg
+pdf2svg
 =======
 
-What is Pdf2Svg?
+What is pdf2svg?
 ================
 
-Pdf2Svg is a simple commandline utility to convert all pages of a PDF
+pdf2svg is a simple commandline utility to convert all pages of a PDF
 (Portable Document Format) to a bunch of SVG (Scalable Vector Graphics) files.
 
 Intentions
