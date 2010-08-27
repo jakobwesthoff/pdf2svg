@@ -108,28 +108,7 @@ namespace org.westhoffswelt.pdf2svg {
                     error( "Fatal error transforming page %i: %s.", i+1, e.message );
                 }
             }
-/*
 
-            var page_number = args[2].to_int();
-            var output = args[3];
-            
-            try {
-                var document = new Poppler.Document.from_file( pdf_file.get_uri(), null );
-                var page = document.get_page( page_number );
-
-                double width, height;
-                page.get_size( out width, out height );
-                
-                var surface = new Cairo.SvgSurface( output, width, height );
-                var context = new Cairo.Context( surface );
-
-                page.render( context );
-
-                return 0;
-            }
-            catch( Error e ) {
-                error( "Oops: %s", e.message );
-            }*/
             return 0;
         }
 
